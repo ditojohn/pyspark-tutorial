@@ -15,7 +15,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as f
 
 def write_json(df, filepath):
-    shutil.rmtree(filepath)
+    #shutil.rmtree(filepath)
     df.write.json(filepath)
 
     for root, dirs, files in os.walk(filepath):
