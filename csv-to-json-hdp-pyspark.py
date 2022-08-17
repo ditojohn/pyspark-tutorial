@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 # Reference:
 # https://www.cloudera.com/tutorials/setting-up-a-spark-development-environment-with-python.html
-# HDFS Syntax: hdfs:///tmp/shakespeare.txt
+# HDFS Syntax: hdfs:///tmp/csv-to-json/employee.csv
 # Sandbox Deployment:
-# Copy to HDP sandbox: scp -P 2222 ./Main.py root@sandbox-hdp.hortonworks.com:/root
+# Change to project directory: cd C:\JMCube\Make\projects\python\pyspark\pyspark-tutorial
+# Copy to HDP sandbox: scp -P 2222 ./csv-to-json-hdp-pyspark.py root@sandbox-hdp.hortonworks.com:/root
 # Open sandbox shell: sh -p 2222 root@sandbox-hdp.hortonworks.com
-# Use spark-submit to run the program: spark-submit ./Main.py
-# Delete HDFS directory: hdfs dfs -rm -r /tmp/shakespeareWordCount
+# Use spark-submit to run the program: spark-submit ./csv-to-json-hdp-pyspark.py
+# Delete HDFS directory: hdfs dfs -rm -r /tmp/csv-to-json/output
 
 import os
 import shutil
@@ -24,20 +25,20 @@ def write_json(df, filepath):
                 print("\nContents of {}:".format(filepath + "/" + file))
                 print(open(filepath + "/" + file, "r").read())
 
-spark = SparkSession.builder.appName('bcbsa-dm-csvtojson').getOrCreate()
+spark = SparkSession.builder.appName('csv-to-json').getOrCreate()
 
 # Read CSV and create dataframe
 print("Reading CSV ...")
-csvdf = spark.read.csv("hdfs:///tmp/employee.csv", header=True, inferSchema=True)
+csvdf = spark.read.csv("hdfs:///tmp/csv-to-json/employee.csv", header=True, inferSchema=True)
 csvdf.printSchema()
 csvdf.show()
 
 # Derive CSV fields
 print("Deriving fields ...")
-lkpdf = spark.read.csv("hdfs:///tmp/department.csv", header=True, inferSchema=True)
+lkpdf = spark.read.csv("hdfs:///tmp/csv-to-json/department.csv", header=True, inferSchema=True)
 jsondf = (csvdf
           .withColumn('RevSalary', csvdf.Salary * 1.1)  # Derive fields
-          .withColumn('Financials', f.struct(csvdf.Salary, csvdf.RevSalary))  # Derive nested fields
+          .withColumn('Financials', f.struct('Salary', 'RevSalary'))  # Derive nested fields
           .join(f.broadcast(lkpdf), csvdf.Dept == lkpdf.Dept)  # Lookup values
           .select('Name', 'Age', csvdf.Dept, 'Manager', 'Financials')  # Select subset of fields
           )
@@ -46,4 +47,4 @@ jsondf.show()
 
 # Write to JSON
 print("Writing to JSON ...")
-write_json(jsondf, "csv-to-json")
+write_json(jsondf, "hdfs:///tmp/csv-to-json/output")
