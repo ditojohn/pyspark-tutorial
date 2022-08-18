@@ -11,11 +11,14 @@ import shutil
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as f
 
-
 def write_json(df, filepath):
 
-    if os.path.exists(filepath) and os.path.isdir(filepath):
+    try:
         shutil.rmtree(filepath)
+    except Exception as inst:
+        print(type(inst))  # the exception instance
+        print(inst.args)  # arguments stored in .args
+        print(inst)  # __str__ allows args to be printed directly
 
     df.write.json(filepath)
     
@@ -24,7 +27,23 @@ def write_json(df, filepath):
             if file.endswith('.json'):
                 print("\nContents of {}:".format(filepath + "/" + file))
                 print(open(filepath + "/" + file, "r").read())
-    
+
+# Hadoop Settings
+os.environ['HADOOP_HOME'] = "C:\JMCube\Make\hadoop"
+os.environ['hadoop.home.dir'] = "C:\JMCube\Make\hadoop"
+
+# PySpark Settings
+os.environ['PYSPARK_PYTHON'] = "python"
+os.environ['PYSPARK_DRIVER_PYTHON'] = "python"
+os.environ['SPARK_HOME'] = "C:\JMCube\Make\spark\spark-3.3.0-bin-hadoop2"
+
+# print(os.environ['JAVA_HOME'])
+# print(os.environ['HADOOP_HOME'])
+# print(os.environ['hadoop.home.dir'])
+# print(os.environ['SPARK_HOME'])
+# print(os.environ['PYSPARK_PYTHON'])
+# print(os.environ['PYSPARK_DRIVER_PYTHON'])
+# print(os.environ['PATH'])
 
 spark = SparkSession.builder.appName('csv-to-json').getOrCreate()
 
