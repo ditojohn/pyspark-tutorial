@@ -6,6 +6,7 @@
 https://www.youtube.com/watch?v=zhbMKX9eIPM
 """
 
+import platform
 import os
 import shutil
 from pyspark.sql import SparkSession
@@ -28,22 +29,23 @@ def write_json(df, filepath):
                 print("\nContents of {}:".format(filepath + "/" + file))
                 print(open(filepath + "/" + file, "r").read())
 
-# Hadoop Settings
-os.environ['HADOOP_HOME'] = "C:\JMCube\Make\hadoop"
-os.environ['hadoop.home.dir'] = "C:\JMCube\Make\hadoop"
+if platform.system() == "Windows":
+    # Hadoop Settings
+    os.environ['HADOOP_HOME'] = "C:\JMCube\Make\hadoop"
+    os.environ['hadoop.home.dir'] = "C:\JMCube\Make\hadoop"
 
-# PySpark Settings
-os.environ['PYSPARK_PYTHON'] = "python"
-os.environ['PYSPARK_DRIVER_PYTHON'] = "python"
-os.environ['SPARK_HOME'] = "C:\JMCube\Make\spark\spark-3.3.0-bin-hadoop2"
+    # PySpark Settings
+    os.environ['PYSPARK_PYTHON'] = "python"
+    os.environ['PYSPARK_DRIVER_PYTHON'] = "python"
+    os.environ['SPARK_HOME'] = "C:\JMCube\Make\spark\spark-3.3.0-bin-hadoop2"
 
-# print(os.environ['JAVA_HOME'])
-# print(os.environ['HADOOP_HOME'])
-# print(os.environ['hadoop.home.dir'])
-# print(os.environ['SPARK_HOME'])
-# print(os.environ['PYSPARK_PYTHON'])
-# print(os.environ['PYSPARK_DRIVER_PYTHON'])
-# print(os.environ['PATH'])
+    # print(os.environ['JAVA_HOME'])
+    print(os.environ['HADOOP_HOME'])
+    print(os.environ['hadoop.home.dir'])
+    print(os.environ['SPARK_HOME'])
+    print(os.environ['PYSPARK_PYTHON'])
+    print(os.environ['PYSPARK_DRIVER_PYTHON'])
+    # print(os.environ['PATH'])
 
 spark = SparkSession.builder.appName('csv-to-json').getOrCreate()
 

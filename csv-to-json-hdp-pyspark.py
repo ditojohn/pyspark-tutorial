@@ -11,19 +11,26 @@
 # Delete HDFS directory: hdfs dfs -rm -r /tmp/csv-to-json/output
 
 import os
-import shutil
+import subprocess
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as f
 
 def write_json(df, filepath):
-    #shutil.rmtree(filepath)
+
+    try:
+        output = subprocess.Popen(["hdfs", "dfs", "-rm", "-r", filepath], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except Exception as inst:
+        print(type(inst))  # the exception instance
+        print(inst.args)  # arguments stored in .args
+        print(inst)  # __str__ allows args to be printed directly
+
     df.write.json(filepath)
 
-    for root, dirs, files in os.walk(filepath):
-        for file in files:
-            if file.endswith('.json'):
-                print("\nContents of {}:".format(filepath + "/" + file))
-                print(open(filepath + "/" + file, "r").read())
+    # for root, dirs, files in os.walk(filepath):
+    #     for file in files:
+    #         if file.endswith('.json'):
+    #             print("\nContents of {}:".format(filepath + "/" + file))
+    #             print(open(filepath + "/" + file, "r").read())
 
 spark = SparkSession.builder.appName('csv-to-json').getOrCreate()
 
